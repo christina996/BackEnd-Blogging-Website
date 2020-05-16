@@ -10,7 +10,6 @@ const Paginate = require('../helpers/Pagination');
 // upload one file
 const uploadFile = upload.single('photo');
 
-//
 const addNewBlog = async (req, res) => {
   const { title, body } = req.body;
   let { photo } = req.body;

@@ -11,7 +11,7 @@ const addNewUser = async (req, res) => {
   const token = await user.generateToken();
   res
     .status(201)
-    .json({ message: `${user.firstName} Added Successfully`, user, token });
+    .json({ message: `${user.firstName} Register Successfully`, user, token });
 };
 
 const loginUser = async (req, res) => {
@@ -28,24 +28,18 @@ const loginUser = async (req, res) => {
 
 const addFollowingUser = async (req, res) => {
   const user = await User.findById(req.params.id);
-  console.log(user);
+
   if (!user) throw new CustomError(404, 'User Not Found');
   const found = req.user.following.some((el) => el.toString() === user.id);
-  if (!found) {
-    req.user.following.push(user);
-    await req.user.save();
-    res.status(200).json({
-      message: `you follow ${user.firstName} successfully`,
-    });
-  } else {
-    await User.updateOne(
-      { _id: req.user._id },
-      { $pull: { following: req.params.id } }
-    );
-    res.status(200).json({
-      message: `un follow ${user.firstName} successfully`,
-    });
-  }
+  const operator = found ? '$pull' : '$push';
+  const message = found ? 'un' : 'you';
+  await User.updateOne(
+    { _id: req.user._id },
+    { [operator]: { following: req.params.id } }
+  );
+  res.status(200).json({
+    message: `${message} follow ${user.firstName} successfully`,
+  });
 };
 
 const getFollowingUsersBlogs = async (req, res) => {
