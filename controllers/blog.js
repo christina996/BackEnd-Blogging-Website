@@ -7,14 +7,19 @@ const CustomError = require('../helpers/customError');
 const upload = require('../middleware/uploadFile');
 const Paginate = require('../helpers/Pagination');
 
+const cloudinary = require('cloudinary');
+
 // upload one file
 const uploadFile = upload.single('photo');
-
 const addNewBlog = async (req, res) => {
   const { title, body } = req.body;
   let { photo } = req.body;
   let { tags } = req.body;
-  if (req.file) photo = `/uploads/${req.file.filename}`;
+  // if (req.file) photo = `/uploads/${req.file.filename}`;
+  if (req.file) {
+    const image = await cloudinary.v2.uploader.upload(req.file.path);
+    photo = image.url;
+  }
 
   tags =
     tags.trim().length === 0
@@ -51,8 +56,11 @@ const updateBlog = async (req, res) => {
   if (tags.trim().length) {
     tagsArr = _.uniq(tags.split(',').map((item) => item.trim()));
   }
-  if (req.file) req.body.photo = `/uploads/${req.file.filename}`;
-
+  // if (req.file) req.body.photo = `/uploads/${req.file.filename}`;
+  if (req.file) {
+    const image = await cloudinary.v2.uploader.upload(req.file.path);
+    req.body.photo = image.url;
+  }
   const newData = { ...req.body, tags: tagsArr };
   await Blog.updateOne({ _id: req.params.id }, newData);
   res.json({
