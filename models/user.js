@@ -66,9 +66,14 @@ const userSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-    toJSON: { transform: (doc, ret) => _.omit(ret, ['__v', 'password']) },
+    toJSON: {
+      transform: (doc, ret) =>
+        _.omit(ret, ['__v', 'password', 'createdAt', 'updatedAt']),
+    },
   }
 );
+
+userSchema.index({ firstName: 'text', lastName: 'text' });
 
 userSchema.plugin(uniqueValidator, {
   message: 'Email is already exist',
@@ -91,13 +96,9 @@ userSchema.methods.checkPassword = function (password) {
 };
 
 userSchema.pre('save', async function () {
-  const currentDocument = this;
-  if (currentDocument.isModified('password')) {
+  if (this.isModified('password')) {
     const salt = await bcrypt.genSalt(+saltRounds);
-    currentDocument.password = await bcrypt.hash(
-      currentDocument.password,
-      salt
-    );
+    this.password = await bcrypt.hash(this.password, salt);
   }
 });
 

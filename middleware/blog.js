@@ -7,15 +7,14 @@ const Blog = require('../models/blog');
 const validateBlogRequest = validateRequest([
   check('title').notEmpty().isLength({ min: 3 }),
   check('body').notEmpty().isLength({ min: 20 }),
-  check('photo').optional(),
+  // check('photo').notEmpty(),
   check('tags').optional(),
 ]);
 
 const validateUserForBlog = async (req, res, next) => {
   const blog = await Blog.findById(req.params.id);
   if (!blog) throw new CustomError('Blog with the given ID is not exist.', 404);
-
-  if (blog.author !== req.user.id) {
+  if (blog.author.toString() !== req.user.id.toString()) {
     throw new CustomError('You Are Not Allowed', 403);
   }
   next();

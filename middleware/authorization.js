@@ -4,7 +4,6 @@ const CustomError = require('../helpers/customError');
 // eslint-disable-next-line consistent-return
 const authenticate = async (req, res, next) => {
   const { authorization } = req.headers;
-  console.log(authorization);
   if (!authorization) {
     return next(new CustomError('Authorization required', 401));
   }

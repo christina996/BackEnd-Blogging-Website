@@ -1,7 +1,5 @@
 const mongoose = require('mongoose');
 
-// file
-
 const blogSchema = new mongoose.Schema(
   {
     author: {
@@ -24,15 +22,17 @@ const blogSchema = new mongoose.Schema(
     },
     photo: {
       type: String,
-      // required: [true, 'Blog Image is required'],
+      required: [true, 'Blog Image is required'],
     },
     tags: {
       type: [String],
-      maxlength: 10,
     },
   },
   { timestamps: true }
 );
+
+blogSchema.index({ title: 'text', tags: 'text' });
+
 const Blog = mongoose.model('Blog', blogSchema);
 
 module.exports = Blog;

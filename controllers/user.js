@@ -3,8 +3,7 @@ const User = require('../models/user');
 const Blog = require('../models/blog');
 
 const CustomError = require('../helpers/customError');
-
-const { Paginate } = require('./blog');
+const Paginate = require('../helpers/Pagination');
 
 const addNewUser = async (req, res) => {
   const newUser = new User(req.body);

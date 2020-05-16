@@ -5,28 +5,23 @@ const _ = require('lodash');
 const Blog = require('../models/blog');
 const CustomError = require('../helpers/customError');
 const upload = require('../middleware/uploadFile');
+const Paginate = require('../helpers/Pagination');
 
-// will remove in helper
-const Paginate = (page, limit, blogs) => {
-  const NumOfPages = Math.ceil(blogs.length / limit);
-  const startIndex = (page - 1) * limit;
-  const endIndex = page * limit;
-  return { blogs: blogs.slice(startIndex, endIndex), NumOfPages };
-};
 // upload one file
 const uploadFile = upload.single('photo');
 
+//
 const addNewBlog = async (req, res) => {
   const { title, body } = req.body;
   let { photo } = req.body;
   let { tags } = req.body;
   if (req.file) photo = `/uploads/${req.file.filename}`;
 
-  if (tags.trim().length === 0) {
-    tags = [];
-  } else {
-    tags = _.uniq(tags.split(',').map((item) => item.trim()));
-  }
+  tags =
+    tags.trim().length === 0
+      ? []
+      : _.uniq(tags.split(',').map((item) => item.trim()));
+
   const newBlog = new Blog({
     author: req.user._id,
     title,
@@ -52,15 +47,14 @@ const deleteBlog = async (req, res) => {
 };
 
 const updateBlog = async (req, res) => {
-  const { title, body, tags } = req.body;
-  let { photo } = req.body;
+  const { tags } = req.body;
   let tagsArr = [];
   if (tags.trim().length) {
     tagsArr = _.uniq(tags.split(',').map((item) => item.trim()));
   }
-  if (req.file) photo = `/uploads/${req.file.filename}`;
+  if (req.file) req.body.photo = `/uploads/${req.file.filename}`;
 
-  const newData = { title, body, photo, tags: tagsArr };
+  const newData = { ...req.body, tags: tagsArr };
   await Blog.updateOne({ _id: req.params.id }, newData);
   res.json({
     message: 'Blog Updated Successfully',
@@ -83,7 +77,7 @@ const getBlogsPaginate = async (req, res) => {
 
   if (tag) {
     blogs = blogs.filter(
-      (blg) => blg.tags.findIndex((tg) => tg.toLowerCase() === tag) !== -1
+      (blg) => blg.tags.findIndex((tg) => tg.toLowerCase().includes(tag)) !== -1
     );
   } else if (title && title !== '') {
     blogs = blogs.filter((blg) => blg.title.toLowerCase().includes(title));
@@ -143,7 +137,6 @@ module.exports = {
   updateBlog,
   getBlogsPaginate,
   getBlogById,
-  Paginate,
   getBlogsByUserProfile,
   getBlogsById,
   uploadFile,
