@@ -19,7 +19,7 @@ const blogRouter = require('./routes/blog');
 app.use(cors());
 
 // for image
-app.use(express.static(`${__dirname}/public`));
+// app.use(express.static(`${__dirname}/public`));
 app.use(express.json());
 app.use(morgan(':url :method :date'));
 
