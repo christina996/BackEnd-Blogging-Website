@@ -89,11 +89,17 @@ const getBlogsPaginate = async (req, res) => {
   } else if (title && title !== '') {
     blogs = blogs.filter((blg) => blg.title.toLowerCase().includes(title));
   } else if (author) {
-    blogs = blogs.filter(
-      (blg) =>
-        blg.author.firstName.toLowerCase().includes(author) ||
-        blg.author.lastName.toLowerCase().includes(author)
-    );
+    author
+      .split(' ')
+      .map((item) =>
+        blogs.concat(
+          blogs.filter(
+            (blg) =>
+              blg.author.firstName.toLowerCase().includes(item) ||
+              blg.author.lastName.toLowerCase().includes(item)
+          )
+        )
+      );
   }
 
   const obj = Paginate(page, limit, blogs);
